@@ -5,6 +5,7 @@ import java.util.List;
 public class Question {
 
     private final String question;
+
     private final List<Answer> answers;
 
     public Question(String question, List<Answer> answers) {

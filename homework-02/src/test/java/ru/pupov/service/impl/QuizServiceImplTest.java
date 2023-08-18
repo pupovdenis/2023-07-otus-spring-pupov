@@ -1,6 +1,5 @@
 package ru.pupov.service.impl;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,23 +7,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
-import ru.pupov.config.AppConfig;
-import ru.pupov.converter.QuestionConverter;
+import org.springframework.core.convert.ConversionService;
+import ru.pupov.config.AppProp;
 import ru.pupov.dao.QuestionDao;
-import ru.pupov.dao.StudentDao;
 import ru.pupov.domain.Answer;
 import ru.pupov.domain.Question;
 import ru.pupov.domain.Student;
 import ru.pupov.service.IOService;
+import ru.pupov.service.StudentService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 
@@ -34,7 +32,6 @@ class QuizServiceImplTest {
 
     private static final String RESULT_SUCCESS_MESSAGE = "You passed the test\n";
     private static final String RESULT_FAIL_MESSAGE = "You did not passed the test\n";
-    private static final String ENTER_YOUR_ANSWER_MESSAGE = "Enter your answer: ";
     private int correctAnswerTest = 5;
 
     @Mock
@@ -42,11 +39,11 @@ class QuizServiceImplTest {
     @Mock
     private QuestionDao questionDao;
     @Mock
-    private StudentDao studentDao;
+    private StudentService studentService;
     @Mock
-    private QuestionConverter questionConverter;
-    @Spy
-    private AppConfig appConfig;
+    private ConversionService conversionService;
+    @Mock
+    private AppProp appProp;
     @InjectMocks
     private QuizServiceImpl quizService;
 
@@ -67,22 +64,24 @@ class QuizServiceImplTest {
     @DisplayName("Без ошибок проводит тестирование")
     @Test
     void shouldNotThrowAnyException() {
-        Mockito.doReturn(1).when(appConfig).getPassingNumberOfCorrectAnswers();
+        Mockito.doReturn(1).when(appProp).getPassingNumberOfCorrectAnswers();
         Mockito.doReturn(List.of(question)).when(questionDao).getAll();
         Mockito.doNothing().when(ioService).outputString(anyString());
-        Mockito.doReturn(correctAnswerTest).when(ioService).readIntWithPrompt(ENTER_YOUR_ANSWER_MESSAGE);
-        Mockito.doReturn(new Student("Bruno", "Traven")).when(studentDao).getStudent();
+        Mockito.doReturn(correctAnswerTest).when(ioService)
+                .readIntWithPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
+        Mockito.doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
         assertDoesNotThrow(() -> quizService.run());
     }
 
     @DisplayName("Проводит успешную сдачу")
     @Test
     void shouldMakeSuccessResult() {
-        Mockito.doReturn(1).when(appConfig).getPassingNumberOfCorrectAnswers();
+        Mockito.doReturn(1).when(appProp).getPassingNumberOfCorrectAnswers();
         Mockito.doReturn(List.of(question)).when(questionDao).getAll();
         Mockito.doNothing().when(ioService).outputString(anyString());
-        Mockito.doReturn(correctAnswerTest).when(ioService).readIntWithPrompt(ENTER_YOUR_ANSWER_MESSAGE);
-        Mockito.doReturn(new Student("Bruno", "Traven")).when(studentDao).getStudent();
+        Mockito.doReturn(correctAnswerTest).when(ioService)
+                .readIntWithPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
+        Mockito.doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
         quizService.run();
         Mockito.verify(ioService, times(1)).outputString(RESULT_SUCCESS_MESSAGE);
         Mockito.verify(ioService, times(0)).outputString(RESULT_FAIL_MESSAGE);
@@ -91,11 +90,12 @@ class QuizServiceImplTest {
     @DisplayName("Проводит провальную сдачу")
     @Test
     void shouldMakeFailResult() {
-        Mockito.doReturn(2).when(appConfig).getPassingNumberOfCorrectAnswers();
+        Mockito.doReturn(2).when(appProp).getPassingNumberOfCorrectAnswers();
         Mockito.doReturn(List.of(question)).when(questionDao).getAll();
         Mockito.doNothing().when(ioService).outputString(anyString());
-        Mockito.doReturn(correctAnswerTest).when(ioService).readIntWithPrompt(ENTER_YOUR_ANSWER_MESSAGE);
-        Mockito.doReturn(new Student("Bruno", "Traven")).when(studentDao).getStudent();
+        Mockito.doReturn(correctAnswerTest).when(ioService)
+                .readIntWithPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
+        Mockito.doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
         quizService.run();
         Mockito.verify(ioService, times(0)).outputString(RESULT_SUCCESS_MESSAGE);
         Mockito.verify(ioService, times(1)).outputString(RESULT_FAIL_MESSAGE);

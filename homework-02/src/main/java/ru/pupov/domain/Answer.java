@@ -1,7 +1,9 @@
 package ru.pupov.domain;
 
 public class Answer {
+
     private final String text;
+
     private final boolean isCorrectAnswer;
 
     public Answer(String text, boolean isCorrectAnswer) {

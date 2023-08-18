@@ -1,7 +1,7 @@
-package ru.pupov.dao;
+package ru.pupov.service;
 
 import ru.pupov.domain.Student;
 
-public interface StudentDao {
+public interface StudentService {
     Student getStudent();
 }

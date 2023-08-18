@@ -1,9 +1,9 @@
 package ru.pupov.dao.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import ru.pupov.config.AppConfig;
+import ru.pupov.config.AppProp;
+import ru.pupov.config.DataInfoProvider;
 import ru.pupov.dao.QuestionDao;
 import ru.pupov.domain.Answer;
 import ru.pupov.domain.Question;
@@ -21,17 +21,23 @@ import static java.util.stream.Collectors.toList;
 public class QuestionDaoImpl implements QuestionDao {
 
     private static final String CSV_DELIMITER = ";";
+
     private static final int MIN_CSV_STRINGS = 2;
+
     private static final int QUESTION_INDEX = 0;
+
     private static final int CORRECT_ANSWER_INDEX = 1;
 
-    @Autowired
-    private AppConfig appConfig;
+    private final DataInfoProvider dataInfoProvider;
+
+    public QuestionDaoImpl(DataInfoProvider dataInfoProvider) {
+        this.dataInfoProvider = dataInfoProvider;
+    }
 
     @Override
     public List<Question> getAll() {
         var classloader = Thread.currentThread().getContextClassLoader();
-        var classPathResource = new ClassPathResource(appConfig.getCsvPath(), classloader);
+        var classPathResource = new ClassPathResource(dataInfoProvider.getDataResourcePath(), classloader);
         List<Question> questions;
         try (var reader = new BufferedReader(new InputStreamReader(classPathResource.getInputStream()))) {
             questions = getQuestions(reader.lines());

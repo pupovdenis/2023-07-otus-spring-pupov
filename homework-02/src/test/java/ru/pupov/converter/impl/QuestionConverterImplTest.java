@@ -3,6 +3,8 @@ package ru.pupov.converter.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 import ru.pupov.converter.QuestionConverter;
 import ru.pupov.domain.Answer;
 import ru.pupov.domain.Question;
@@ -15,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class QuestionConverterImplTest {
 
     private Question question;
-    private final QuestionConverter questionConverter = new QuestionConverterImpl();
+
+    private final QuestionConverter questionConverter = new QuestionConverter();
 
     @BeforeEach
     void setUp() {
@@ -31,7 +34,7 @@ class QuestionConverterImplTest {
     @DisplayName("Корректно конвертирует вопрос в строку для вывода")
     @Test
     void shouldConvertQuestionToQuizString() {
-        var result = questionConverter.toQuizString(question);
+        var result = questionConverter.convert(question);
         assertThat(result).isEqualTo(getCorrectResult());
     }
 

@@ -8,6 +8,7 @@ import java.util.Scanner;
 public class ConsoleIOService implements IOService {
 
     private final Scanner userInput;
+
     private final PrintStream userOutput;
 
     public ConsoleIOService() {
@@ -39,5 +40,20 @@ public class ConsoleIOService implements IOService {
     public String readStringWithPrompt(String prompt, boolean notNewLine) {
         outputString(prompt, notNewLine);
         return userInput.nextLine();
+    }
+
+    @Override
+    public int readIntWithPromptByInterval(int min, int max, String prompt, String errorMessage) {
+        while (true) {
+            try {
+                var answerInt = readIntWithPrompt(prompt);
+                if (answerInt > max || answerInt < min) {
+                    throw new NumberFormatException();
+                }
+                return answerInt;
+            } catch (NumberFormatException nfe) {
+                outputString(errorMessage);
+            }
+        }
     }
 }

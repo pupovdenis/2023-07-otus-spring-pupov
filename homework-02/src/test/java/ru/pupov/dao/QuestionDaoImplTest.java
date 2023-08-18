@@ -10,9 +10,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import ru.pupov.config.AppConfig;
+import ru.pupov.config.AppProp;
+import ru.pupov.config.DataInfoProvider;
 import ru.pupov.dao.impl.QuestionDaoImpl;
 import ru.pupov.domain.Answer;
 
@@ -22,15 +21,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class QuestionDaoImplTest {
 
-    @Spy
-    private AppConfig appConfig;
+    @Mock
+    private DataInfoProvider dataInfoProvider;
     @InjectMocks
     private QuestionDaoImpl questionDao;
 
     @DisplayName("Корректно извлекает данные")
     @Test
     void shouldExtractCorrectQuestions() {
-        Mockito.doReturn("data.csv").when(appConfig).getCsvPath();
+        Mockito.doReturn("data.csv").when(dataInfoProvider).getDataResourcePath();
         var questions = questionDao.getAll();
         assertThat(questions)
                 .filteredOn(question ->
