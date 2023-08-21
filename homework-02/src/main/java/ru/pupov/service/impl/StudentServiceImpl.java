@@ -1,11 +1,11 @@
 package ru.pupov.service.impl;
 
-import org.springframework.stereotype.Component;
-import ru.pupov.service.StudentService;
+import org.springframework.stereotype.Service;
 import ru.pupov.domain.Student;
 import ru.pupov.service.IOService;
+import ru.pupov.service.StudentService;
 
-@Component
+@Service
 public class StudentServiceImpl implements StudentService {
 
     private static final String ASK_FIRST_NAME_MESSAGE = "\nEnter your first name: ";

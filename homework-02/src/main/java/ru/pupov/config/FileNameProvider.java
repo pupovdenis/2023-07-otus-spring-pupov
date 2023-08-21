@@ -1,5 +1,5 @@
 package ru.pupov.config;
 
-public interface DataInfoProvider {
+public interface FileNameProvider {
     String getDataResourcePath();
 }

@@ -16,8 +16,11 @@ import static java.util.stream.Collectors.toList;
 public class QuestionDao {
 
     private static final String CSV_DELIMITER = ";";
+
     private static final int MIN_CSV_STRINGS = 2;
+
     private static final int QUESTION_INDEX = 0;
+
     private static final int CORRECT_ANSWER_INDEX = 1;
 
     private final String csvPath;

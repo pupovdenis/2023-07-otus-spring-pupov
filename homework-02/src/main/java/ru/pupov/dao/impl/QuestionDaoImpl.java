@@ -2,8 +2,7 @@ package ru.pupov.dao.impl;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import ru.pupov.config.AppProp;
-import ru.pupov.config.DataInfoProvider;
+import ru.pupov.config.FileNameProvider;
 import ru.pupov.dao.QuestionDao;
 import ru.pupov.domain.Answer;
 import ru.pupov.domain.Question;
@@ -28,16 +27,16 @@ public class QuestionDaoImpl implements QuestionDao {
 
     private static final int CORRECT_ANSWER_INDEX = 1;
 
-    private final DataInfoProvider dataInfoProvider;
+    private final FileNameProvider fileNameProvider;
 
-    public QuestionDaoImpl(DataInfoProvider dataInfoProvider) {
-        this.dataInfoProvider = dataInfoProvider;
+    public QuestionDaoImpl(FileNameProvider fileNameProvider) {
+        this.fileNameProvider = fileNameProvider;
     }
 
     @Override
     public List<Question> getAll() {
         var classloader = Thread.currentThread().getContextClassLoader();
-        var classPathResource = new ClassPathResource(dataInfoProvider.getDataResourcePath(), classloader);
+        var classPathResource = new ClassPathResource(fileNameProvider.getDataResourcePath(), classloader);
         List<Question> questions;
         try (var reader = new BufferedReader(new InputStreamReader(classPathResource.getInputStream()))) {
             questions = getQuestions(reader.lines());
