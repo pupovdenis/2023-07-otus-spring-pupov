@@ -1,6 +1,9 @@
-package ru.pupov.dao;
+package ru.pupov.dao.impl;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
+import ru.pupov.config.FileNameProvider;
+import ru.pupov.dao.QuestionDao;
 import ru.pupov.domain.Answer;
 import ru.pupov.domain.Question;
 
@@ -13,7 +16,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class QuestionDao {
+@Component
+public class QuestionDaoImpl implements QuestionDao {
 
     private static final String CSV_DELIMITER = ";";
 
@@ -23,15 +27,16 @@ public class QuestionDao {
 
     private static final int CORRECT_ANSWER_INDEX = 1;
 
-    private final String csvPath;
+    private final FileNameProvider fileNameProvider;
 
-    public QuestionDao(String csvPath) {
-        this.csvPath = csvPath;
+    public QuestionDaoImpl(FileNameProvider fileNameProvider) {
+        this.fileNameProvider = fileNameProvider;
     }
 
+    @Override
     public List<Question> getAll() {
         var classloader = Thread.currentThread().getContextClassLoader();
-        var classPathResource = new ClassPathResource(csvPath, classloader);
+        var classPathResource = new ClassPathResource(fileNameProvider.getDataResourcePath(), classloader);
         List<Question> questions;
         try (var reader = new BufferedReader(new InputStreamReader(classPathResource.getInputStream()))) {
             questions = getQuestions(reader.lines());
