@@ -1,0 +1,16 @@
+# INTERNATIONALIZATION
+spring:
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+banner:
+  image:
+    location: classpath:banner.txt
+application:
+  java: 17
+  file-name: data.csv
+  passing-number-of-correct-answers: 4
+  locale: ru-RU
+#  locale: en-US
