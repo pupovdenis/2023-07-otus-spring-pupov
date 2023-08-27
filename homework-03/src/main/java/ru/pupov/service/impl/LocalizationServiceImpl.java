@@ -2,9 +2,11 @@ package ru.pupov.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Service;
 import ru.pupov.config.LocaleProvider;
 import ru.pupov.service.LocalizationService;
 
+@Service
 @RequiredArgsConstructor
 public class LocalizationServiceImpl implements LocalizationService {
 

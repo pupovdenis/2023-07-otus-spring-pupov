@@ -2,6 +2,7 @@ package ru.pupov.service.impl;
 
 import ru.pupov.service.IOService;
 
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -11,9 +12,9 @@ public class ConsoleIOService implements IOService {
 
     private final PrintStream userOutput;
 
-    public ConsoleIOService() {
-        userInput = new Scanner(System.in);
-        this.userOutput = System.out;
+    public ConsoleIOService(PrintStream ps, InputStream is) {
+        userInput = new Scanner(is);
+        this.userOutput = ps;
     }
 
     @Override

@@ -7,8 +7,7 @@ import ru.pupov.config.AppProps;
 import ru.pupov.dao.QuestionDao;
 import ru.pupov.domain.Question;
 import ru.pupov.domain.Student;
-import ru.pupov.service.IOService;
-import ru.pupov.service.LocalizationService;
+import ru.pupov.service.IOLFacade;
 import ru.pupov.service.QuizService;
 import ru.pupov.service.StudentService;
 
@@ -22,8 +21,6 @@ public class QuizServiceImpl implements QuizService {
 
     private static final String SEPARATOR_LINE = "\r";
 
-    private final IOService ioService;
-
     private final QuestionDao questionDao;
 
     private final ConversionService conversionService;
@@ -32,45 +29,40 @@ public class QuizServiceImpl implements QuizService {
 
     private final AppProps appProps;
 
-    private final LocalizationService localizationService;
+    private final IOLFacade iolFacade;
 
     public void run() {
         var student = studentService.getStudent();
         var questionList = questionDao.getAll();
         if (questionList.isEmpty()) {
-            var emptyQuestionsMessage = localizationService.getMessage("empty.questions.message");
-            ioService.outputString(emptyQuestionsMessage);
+            iolFacade.outputString("empty.questions.message", true);
             return;
         }
-        var startMessage = "\n" + localizationService.getMessage("start.message");
-        ioService.outputString(startMessage);
+        iolFacade.outputString("start.message", true, 1);
         int rightAnswersCounter = doQuizAndGetResult(questionList);
         outputFinish(student, rightAnswersCounter);
     }
 
     private void outputFinish(Student student, int rightAnswersCounter) {
-        ioService.outputString(SEPARATOR_LINE);
-        var endMessageFormat = localizationService.getMessage("end.message.format");
-        var fullEndMessageFormat = endMessageFormat.formatted(student.toString(), rightAnswersCounter + "");
-        ioService.outputString(fullEndMessageFormat);
+        iolFacade.outputString(SEPARATOR_LINE, false);
+        var studentOutputString = conversionService.convert(student, String.class);
+        iolFacade.outputFormattedStringWithLocalization(
+                "end.message.format", studentOutputString, rightAnswersCounter + "");
         if (rightAnswersCounter >= appProps.getPassingNumberOfCorrectAnswers()) {
-            var resultSuccessMessage = localizationService.getMessage("result.success.message") + "\n";
-            ioService.outputString(resultSuccessMessage);
+            iolFacade.outputString("result.success.message", true);
             return;
         }
-        var resultFailMessage = localizationService.getMessage("result.fail.message") + "\n";
-        ioService.outputString(resultFailMessage);
+        iolFacade.outputString("result.fail.message", true);
     }
 
     private int doQuizAndGetResult(List<Question> questionList) {
         int rightAnswersCounter = 0;
         for (var question : questionList) {
             var questionOutputString = conversionService.convert(question, String.class);
-            ioService.outputString(questionOutputString, true);
-            var enterYourAnswerMessage = localizationService.getMessage("enter.your.answer.message") + " ";
-            var incorrectInputMessage = localizationService.getMessage("incorrect.input.message");
-            var answerInt = ioService.readIntWithPromptByInterval(MIN_ANSWER_NUMBER, question.getAnswers().size(),
-                    enterYourAnswerMessage, incorrectInputMessage);
+            iolFacade.outputString(questionOutputString, false);
+            var answerInt = iolFacade.readIntWithLocalizedPromptByInterval(
+                    MIN_ANSWER_NUMBER, question.getAnswers().size(),
+                    "enter.your.answer.message", "incorrect.input.message");
             if (question.getAnswers().get(answerInt - 1).isCorrectAnswer()) {
                 rightAnswersCounter++;
             }

@@ -22,8 +22,8 @@ public class AppProps implements FileNameProvider, LocaleProvider {
     private int passingNumberOfCorrectAnswers;
 
     @ConstructorBinding
-    public AppProps(Locale locale, String fileName, int passingNumberOfCorrectAnswers) {
-        this.locale = locale;
+    public AppProps(String locale, String fileName, int passingNumberOfCorrectAnswers) {
+        this.locale = Locale.forLanguageTag(locale);
         this.fileName = fileName;
         this.passingNumberOfCorrectAnswers = passingNumberOfCorrectAnswers;
     }
@@ -33,9 +33,7 @@ public class AppProps implements FileNameProvider, LocaleProvider {
         var classloader = Thread.currentThread().getContextClassLoader();
         try {
             var idx = fileName.lastIndexOf('.');
-            var split = locale.toString().split("-");
-            var actualPath = fileName.substring(0, idx) + "_" + split[0] + "_" + split[1].toUpperCase(Locale.ROOT)
-                    + fileName.substring(idx);
+            var actualPath = fileName.substring(0, idx) + "_" + locale + fileName.substring(idx);
             var classPathResource = new ClassPathResource(actualPath, classloader);
             return actualPath;
         } catch (Exception e) {

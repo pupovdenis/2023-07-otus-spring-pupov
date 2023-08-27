@@ -11,8 +11,8 @@ import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Класс QuestionConverterImplTest")
-class QuestionConverterImplTest {
+@DisplayName("Класс QuestionConverterTest")
+class QuestionConverterTest {
 
     private Question question;
 
