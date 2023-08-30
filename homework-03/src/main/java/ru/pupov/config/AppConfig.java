@@ -7,7 +7,7 @@ import org.springframework.context.support.ConversionServiceFactoryBean;
 import ru.pupov.converter.QuestionConverter;
 import ru.pupov.converter.StudentConverter;
 import ru.pupov.service.IOService;
-import ru.pupov.service.impl.ConsoleIOService;
+import ru.pupov.service.impl.IOServiceImpl;
 
 import java.util.Set;
 
@@ -17,7 +17,7 @@ public class AppConfig {
 
     @Bean
     public IOService ioService() {
-        return new ConsoleIOService(System.out, System.in);
+        return new IOServiceImpl(System.out, System.in);
     }
 
     @Bean

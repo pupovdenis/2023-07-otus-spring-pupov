@@ -1,6 +1,6 @@
 package ru.pupov.service;
 
-public interface IOLFacade {
+public interface LocalizationIOService {
 
     void outputString(String str, boolean withLocalization);
 

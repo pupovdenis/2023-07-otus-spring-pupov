@@ -13,9 +13,7 @@ import ru.pupov.dao.QuestionDao;
 import ru.pupov.domain.Answer;
 import ru.pupov.domain.Question;
 import ru.pupov.domain.Student;
-import ru.pupov.service.IOLFacade;
-import ru.pupov.service.IOService;
-import ru.pupov.service.LocalizationService;
+import ru.pupov.service.LocalizationIOService;
 import ru.pupov.service.StudentService;
 
 import java.util.ArrayList;
@@ -48,7 +46,7 @@ class QuizServiceImplTest {
     @Mock
     private AppProps appProps;
     @Mock
-    private IOLFacade iolFacade;
+    private LocalizationIOService localizationIOService;
     @InjectMocks
     private QuizServiceImpl quizService;
 
@@ -71,9 +69,9 @@ class QuizServiceImplTest {
     void shouldNotThrowAnyException() {
         doReturn(1).when(appProps).getPassingNumberOfCorrectAnswers();
         doReturn(List.of(question)).when(questionDao).getAll();
-        doNothing().when(iolFacade).outputString(any(), anyBoolean());
-        doNothing().when(iolFacade).outputString(any(), anyBoolean(), anyInt());
-        doReturn(correctAnswerTest).when(iolFacade)
+        doNothing().when(localizationIOService).outputString(any(), anyBoolean());
+        doNothing().when(localizationIOService).outputString(any(), anyBoolean(), anyInt());
+        doReturn(correctAnswerTest).when(localizationIOService)
                 .readIntWithLocalizedPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
         doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
         assertDoesNotThrow(() -> quizService.run());
@@ -84,13 +82,13 @@ class QuizServiceImplTest {
     void shouldMakeSuccessResult() {
         doReturn(1).when(appProps).getPassingNumberOfCorrectAnswers();
         doReturn(List.of(question)).when(questionDao).getAll();
-        doNothing().when(iolFacade).outputString(any(), anyBoolean());
-        doNothing().when(iolFacade).outputString(any(), anyBoolean(), anyInt());
-        doReturn(correctAnswerTest).when(iolFacade)
+        doNothing().when(localizationIOService).outputString(any(), anyBoolean());
+        doNothing().when(localizationIOService).outputString(any(), anyBoolean(), anyInt());
+        doReturn(correctAnswerTest).when(localizationIOService)
                 .readIntWithLocalizedPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
         doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
         quizService.run();
-        verify(iolFacade, times(1)).outputString(RESULT_SUCCESS_MESSAGE, true);
+        verify(localizationIOService, times(1)).outputString(RESULT_SUCCESS_MESSAGE, true);
     }
 
     @DisplayName("Проводит провальную сдачу")
@@ -98,12 +96,12 @@ class QuizServiceImplTest {
     void shouldMakeFailResult() {
         doReturn(2).when(appProps).getPassingNumberOfCorrectAnswers();
         doReturn(List.of(question)).when(questionDao).getAll();
-        doNothing().when(iolFacade).outputString(any(), anyBoolean());
-        doNothing().when(iolFacade).outputString(any(), anyBoolean(), anyInt());
-        doReturn(correctAnswerTest).when(iolFacade)
+        doNothing().when(localizationIOService).outputString(any(), anyBoolean());
+        doNothing().when(localizationIOService).outputString(any(), anyBoolean(), anyInt());
+        doReturn(correctAnswerTest).when(localizationIOService)
                 .readIntWithLocalizedPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
         doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
         quizService.run();
-        verify(iolFacade, times(1)).outputString(RESULT_FAIL_MESSAGE, true);
+        verify(localizationIOService, times(1)).outputString(RESULT_FAIL_MESSAGE, true);
     }
 }

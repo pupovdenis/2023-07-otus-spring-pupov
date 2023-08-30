@@ -6,13 +6,13 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-public class ConsoleIOService implements IOService {
+public class IOServiceImpl implements IOService {
 
     private final Scanner userInput;
 
     private final PrintStream userOutput;
 
-    public ConsoleIOService(PrintStream ps, InputStream is) {
+    public IOServiceImpl(PrintStream ps, InputStream is) {
         userInput = new Scanner(is);
         this.userOutput = ps;
     }
