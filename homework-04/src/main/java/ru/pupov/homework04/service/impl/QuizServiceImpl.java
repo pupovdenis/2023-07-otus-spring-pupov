@@ -31,8 +31,8 @@ public class QuizServiceImpl implements QuizService {
 
     private final LocalizationIOService localizationIOService;
 
-    public void run(String... payload) {
-        var student = studentService.getStudent(payload);
+    public void run(String firstName, String lastName) {
+        var student = studentService.getStudent(firstName, lastName);
         var questionList = questionDao.getAll();
         if (questionList.isEmpty()) {
             localizationIOService.outputString("empty.questions.message", true);

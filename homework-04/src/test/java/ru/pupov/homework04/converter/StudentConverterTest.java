@@ -1,18 +1,15 @@
 package ru.pupov.homework04.converter;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import ru.pupov.homework04.domain.Student;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("класс StudentConverterTest")
-@SpringBootTest
+@SpringBootTest(classes = StudentConverter.class)
 class StudentConverterTest {
 
     public static final String TEST_FIRST_NAME = "TestFirstName";
@@ -33,13 +30,4 @@ class StudentConverterTest {
     private String getCorrectResult() {
         return TEST_FIRST_NAME + " " + TEST_LAST_NAME;
     }
-
-    @Configuration
-    static class TestConfiguration {
-        @Bean
-        public StudentConverter studentConverter() {
-            return new StudentConverter();
-        }
-    }
-
 }

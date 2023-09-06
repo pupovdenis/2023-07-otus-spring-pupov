@@ -5,10 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import ru.pupov.homework04.converter.QuestionConverter;
-import ru.pupov.homework04.converter.StudentConverter;
 import ru.pupov.homework04.domain.Answer;
 import ru.pupov.homework04.domain.Question;
 
@@ -17,7 +14,7 @@ import java.util.ArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Класс QuestionConverterTest")
-@SpringBootTest
+@SpringBootTest(classes = QuestionConverter.class)
 class QuestionConverterTest {
 
     private Question question;
@@ -53,13 +50,5 @@ class QuestionConverterTest {
                 4) тестовый неправильный ответ №4
                 5) тестовый правильный ответ №5
                             """;
-    }
-
-    @Configuration
-    static class TestConfiguration {
-        @Bean
-        public QuestionConverter questionConverter() {
-            return new QuestionConverter();
-        }
     }
 }

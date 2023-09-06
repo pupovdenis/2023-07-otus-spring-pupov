@@ -45,8 +45,6 @@ class QuizServiceImplTest {
     @MockBean
     private QuestionDao questionDao;
     @MockBean
-    private StudentService studentService;
-    @MockBean
     private ConversionService conversionService;
     @MockBean
     private AppProps appProps;
@@ -78,8 +76,7 @@ class QuizServiceImplTest {
         doNothing().when(localizationIOService).outputString(any(), anyBoolean(), anyInt());
         doReturn(correctAnswerTest).when(localizationIOService)
                 .readIntWithLocalizedPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
-        doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
-        assertDoesNotThrow(() -> quizService.run());
+        assertDoesNotThrow(() -> quizService.run("Bruno", "Traven"));
     }
 
     @DisplayName("Проводит успешную сдачу")
@@ -91,8 +88,7 @@ class QuizServiceImplTest {
         doNothing().when(localizationIOService).outputString(any(), anyBoolean(), anyInt());
         doReturn(correctAnswerTest).when(localizationIOService)
                 .readIntWithLocalizedPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
-        doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
-        quizService.run();
+        quizService.run("Bruno", "Traven");
         verify(localizationIOService, times(1)).outputString(RESULT_SUCCESS_MESSAGE, true);
     }
 
@@ -105,8 +101,7 @@ class QuizServiceImplTest {
         doNothing().when(localizationIOService).outputString(any(), anyBoolean(), anyInt());
         doReturn(correctAnswerTest).when(localizationIOService)
                 .readIntWithLocalizedPromptByInterval(anyInt(), anyInt(), anyString(), anyString());
-        doReturn(new Student("Bruno", "Traven")).when(studentService).getStudent();
-        quizService.run();
+        quizService.run("Bruno", "Traven");
         verify(localizationIOService, times(1)).outputString(RESULT_FAIL_MESSAGE, true);
     }
 }

@@ -20,9 +20,9 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Student getStudent(String... payload) {
-        if (payload.length >= 2 && (!payload[0].isBlank() && !payload[1].isBlank())) {
-            return new Student(payload[0], payload[1]);
+    public Student getStudent(String firstName, String lastName) {
+        if (!firstName.isBlank() && !lastName.isBlank()) {
+            return new Student(firstName, lastName);
         }
         throw new RuntimeException("payload not correct");
     }
