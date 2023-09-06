@@ -1,0 +1,5 @@
+# отключить shell для тестов
+spring:
+  shell:
+    interactive:
+      enabled: false
