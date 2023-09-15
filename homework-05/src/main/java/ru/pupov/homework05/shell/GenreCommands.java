@@ -6,10 +6,8 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import ru.pupov.homework05.dao.GenreDao;
-import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.domain.Genre;
 
-import java.util.Arrays;
 import java.util.List;
 
 @ShellComponent
@@ -17,8 +15,6 @@ import java.util.List;
 public class GenreCommands {
 
     public static final String GET_ALL_TAG = "0";
-
-    public static final String BOOK_IDS_DELIMITER = ",";
 
     private final GenreDao genreDao;
 
@@ -40,7 +36,7 @@ public class GenreCommands {
             return getResponseFrom(genres);
         } else {
             var genre = genreDao.getById(id);
-            return getResponseFrom(List.of(genre));
+            return genre == null ? "null" : getResponseFrom(List.of(genre));
         }
     }
 
@@ -53,26 +49,16 @@ public class GenreCommands {
         var genre = genreDao.getById(id);
         if (genre != null) {
             genre.setName(name);
-            if (bookIdsString != null && !bookIdsString.equals("null") && !bookIdsString.isBlank()) {
-                genre.setBooks(Arrays.stream(bookIdsString.split(BOOK_IDS_DELIMITER))
-                        .map(String::trim)
-                        .map(Long::parseLong)
-                        .map(bookId -> Book.builder().id(bookId).build())
-                        .toList());
-                genreDao.update(genre, true);
-            } else {
-                genreDao.update(genre, false);
-            }
+            genreDao.update(genre, bookIdsString);
             return "Genre id %d has been updated".formatted(genre.getId());
         }
         return "Could not find the genre id %d".formatted(id);
     }
 
     @ShellMethod(value = "Delete genre", key = {"delete-genre", "dg"})
-    public String deleteById(
-            @ShellOption(help = "Get id of the genre") Long id) {
-        genreDao.deleteById(id);
-        return "Genre id %d was deleted".formatted(id);
+    public String deleteById(@ShellOption(help = "Get id of the genre") Long id) {
+        var result = genreDao.deleteById(id);
+        return result ? "Genre id %d was deleted".formatted(id) : "Could not find genre id %s".formatted(id);
     }
 
     private String getResponseFrom(List<Genre> genres) {

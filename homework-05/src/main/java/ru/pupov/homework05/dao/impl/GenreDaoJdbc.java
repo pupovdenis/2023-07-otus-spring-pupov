@@ -6,25 +6,25 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.pupov.homework05.dao.GenreDao;
-import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.domain.Genre;
 import ru.pupov.homework05.extractor.GenreMapper;
 import ru.pupov.homework05.extractor.GenresRsExtractor;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.util.Objects.isNull;
-
 @Repository
+@Transactional(readOnly = true)
 public class GenreDaoJdbc implements GenreDao {
 
-    public static final long START_ID = 1L;
+    public static final String BOOK_IDS_DELIMITER = ",";
 
-    private final Long nextId;
+    public static final String SQL_IDS_DELIMITER = ",";
 
     private final NamedParameterJdbcOperations namedParameterJdbcOperations;
 
@@ -34,30 +34,29 @@ public class GenreDaoJdbc implements GenreDao {
 
     private final GenresRsExtractor genresRsExtractor;
 
-    public GenreDaoJdbc(NamedParameterJdbcOperations namedParameterJdbcOperations,
+    public GenreDaoJdbc(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+                                NamedParameterJdbcOperations namedParameterJdbcOperations,
                         GenreMapper genreMapper,
                         GenresRsExtractor genresRsExtractor) {
         this.namedParameterJdbcOperations = namedParameterJdbcOperations;
         this.genreMapper = genreMapper;
         this.genresRsExtractor = genresRsExtractor;
         keyHolder = new GeneratedKeyHolder();
-        nextId = getNextId();
     }
 
     @Override
+    @Transactional
     public Long insert(Genre genre) {
         if (genre.getId() != null) {
             throw new RuntimeException("before inserting genre must be without id");
         }
-        var id = isNull(keyHolder.getKey()) ? nextId : keyHolder.getKey().longValue() + 1;
 
         var mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue("id", id);
         mapSqlParameterSource.addValue("name", genre.getName());
 
         namedParameterJdbcOperations.update("""
-                insert into genre (id, name) 
-                values (:id, :name)
+                insert into genre (name)
+                values (:name)
                 """, mapSqlParameterSource, keyHolder);
         return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
@@ -67,9 +66,8 @@ public class GenreDaoJdbc implements GenreDao {
         var params = Map.of("id", id);
         try {
             return namedParameterJdbcOperations.queryForObject("""
-                    select g.id, g.name, b.id book_id, b.name book_name 
+                    select g.id, g.name
                     from genre g
-                    left join book b on b.genre_id=g.id
                     where g.id = :id
                     """, params, genreMapper);
         } catch (DataAccessException e) {
@@ -80,21 +78,27 @@ public class GenreDaoJdbc implements GenreDao {
     @Override
     public List<Genre> getAll() {
         return namedParameterJdbcOperations.query("""
-                select g.id, g.name, b.id book_id, b.name book_name 
+                select g.id, g.name
                 from genre g
-                left join book b on b.genre_id=g.id
                 """, genresRsExtractor);
     }
 
     @Override
-    public void update(Genre genre, boolean withBooks) {
+    @Transactional
+    public void update(Genre genre, String bookIdsString) {
         var params = new HashMap<String, Object>();
         params.put("id", genre.getId());
         params.put("name", genre.getName());
-        if (withBooks) {
-            var bookIds = genre.getBooks().stream()
-                    .map(Book::getId)
-                    .toList();
+        if (bookIdsString != null && !bookIdsString.equals("null") && !bookIdsString.isBlank()) {
+            List<Long> bookIds;
+            try {
+                bookIds = Arrays.stream(bookIdsString.split(BOOK_IDS_DELIMITER))
+                        .map(String::trim)
+                        .map(Long::parseLong)
+                        .toList();
+            } catch (Exception e) {
+                throw new RuntimeException("invalid book ids input data");
+            }
             params.put("bookIds", bookIds);
             doUpdateWithBooks(params);
         } else {
@@ -104,22 +108,20 @@ public class GenreDaoJdbc implements GenreDao {
 
     private void doUpdateWithBooks(Map<String, Object> params) {
         namedParameterJdbcOperations.update("""
-                begin transaction;
-                                
                 update genre
                 set name=:name
                 where id=:id;
-                                
+                """, params);
+        namedParameterJdbcOperations.update("""
                 update book b
                 set b.genre_id = null
                 where genre_id=:id
                 	and b.id not in (:bookIds);
-                                
+                """, params);
+        namedParameterJdbcOperations.update("""
                 update book
                 set genre_id=:id
                 where id in (:bookIds);
-                                
-                commit;
                 """, params);
     }
 
@@ -132,26 +134,17 @@ public class GenreDaoJdbc implements GenreDao {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public boolean deleteById(Long id) {
         var params = Map.of("id", id);
         namedParameterJdbcOperations.update("""
-                begin transaction;
-                                
                 update book b
                 set b.genre_id = null
                 where genre_id=:id;
-                                
-                delete from genre 
-                where id=:id;
-                                
-                commit;
                 """, params);
-    }
-
-    private Long getNextId() {
-        var currentMaxId = namedParameterJdbcOperations.getJdbcOperations().queryForObject("""
-                select max(id) from genre
-                """, Long.class);
-        return isNull(currentMaxId) ? START_ID : currentMaxId + 1;
+        var result = namedParameterJdbcOperations.update("""
+                delete from genre
+                where id=:id;
+                """, params);
+        return result > 0;
     }
 }

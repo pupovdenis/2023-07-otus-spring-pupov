@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.pupov.homework05.dao.BookDao;
 import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.extractor.BookMapper;
@@ -14,15 +15,11 @@ import ru.pupov.homework05.extractor.BooksRsExtractor;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 @Repository
+@Transactional(readOnly = true)
 public class BookDaoJdbc implements BookDao {
-
-    public static final long START_ID = 1L;
-
-    private final Long nextId;
 
     private final NamedParameterJdbcOperations namedParameterJdbcOperations;
 
@@ -32,32 +29,32 @@ public class BookDaoJdbc implements BookDao {
 
     private final BooksRsExtractor booksRsExtractor;
 
-    public BookDaoJdbc(NamedParameterJdbcOperations namedParameterJdbcOperations,
+    public BookDaoJdbc(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+                               NamedParameterJdbcOperations namedParameterJdbcOperations,
                        BookMapper bookMapper,
                        BooksRsExtractor booksRsExtractor) {
         this.namedParameterJdbcOperations = namedParameterJdbcOperations;
         this.bookMapper = bookMapper;
         this.booksRsExtractor = booksRsExtractor;
         keyHolder = new GeneratedKeyHolder();
-        nextId = getNextId();
     }
 
+
+
     @Override
+    @Transactional
     public Long insert(Book book) {
         if (book.getId() != null) {
             throw new RuntimeException("before inserting book must be without id");
         }
-        var id = isNull(keyHolder.getKey()) ? nextId : keyHolder.getKey().longValue() + 1;
-
         var mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue("id", id);
         mapSqlParameterSource.addValue("name", book.getName());
         mapSqlParameterSource.addValue("authorId", book.getAuthor().getId());
         mapSqlParameterSource.addValue("genreId", book.getGenre().getId());
 
         namedParameterJdbcOperations.update("""
-                insert into book (id, name, author_id, genre_id) 
-                values (:id, :name, :authorId, :genreId)
+                insert into book (id, name, author_id, genre_id)
+                values (nextval('book_id_seq'), :name, :authorId, :genreId)
                 """, mapSqlParameterSource, keyHolder);
         return requireNonNull(keyHolder.getKey()).longValue();
     }
@@ -89,6 +86,7 @@ public class BookDaoJdbc implements BookDao {
     }
 
     @Override
+    @Transactional
     public void update(Book book) {
         Map<String, Object> params = Map.of(
                 "id", book.getId(),
@@ -96,25 +94,44 @@ public class BookDaoJdbc implements BookDao {
                 "authorId", book.getAuthor().getId(),
                 "genreId", book.getGenre().getId());
         namedParameterJdbcOperations.update("""
-                update book 
+                update book
                 set name=:name, author_id=:authorId, genre_id=:genreId
                 where id=:id
                 """, params);
     }
 
     @Override
-    public void deleteById(Long id) {
+    @Transactional
+    public boolean deleteById(Long id) {
         var params = Map.of("id", id);
-        namedParameterJdbcOperations.update("""
-                delete from book 
+        var result = namedParameterJdbcOperations.update("""
+                delete from book
                 where id=:id
                 """, params);
+        return result != 0;
     }
 
-    private Long getNextId() {
-        var currentMaxId = namedParameterJdbcOperations.getJdbcOperations().queryForObject("""
-                select max(id) from book
-                """, Long.class);
-        return isNull(currentMaxId) ? START_ID : currentMaxId + 1;
+    @Override
+    public List<Book> getAllByAuthorId(Long authorId) {
+        var params = Map.of("authorId", authorId);
+        return namedParameterJdbcOperations.query("""
+                select b.id, b.name, b.author_id, a.first_name, a.last_name, b.genre_id, g.name genre_name
+                from book b
+                join author a on a.id = b.author_id
+                left join genre g on g.id = b.genre_id
+                where a.id=:authorId
+                """, params, booksRsExtractor);
+    }
+
+    @Override
+    public List<Book> getAllByGenreId(Long genreId) {
+        var params = Map.of("genreId", genreId);
+        return namedParameterJdbcOperations.query("""
+                select b.id, b.name, b.author_id, a.first_name, a.last_name, b.genre_id, g.name genre_name
+                from book b
+                left join author a on a.id = b.author_id
+                join genre g on g.id = b.genre_id
+                where g.id=:genreId
+                """, params, booksRsExtractor);
     }
 }

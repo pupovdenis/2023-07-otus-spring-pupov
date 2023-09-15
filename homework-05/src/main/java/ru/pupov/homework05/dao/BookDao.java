@@ -14,5 +14,9 @@ public interface BookDao {
 
     void update(Book book);
 
-    void deleteById(Long id);
+    boolean deleteById(Long id);
+
+    List<Book> getAllByAuthorId(Long authorId);
+
+    List<Book> getAllByGenreId(Long genreId);
 }

@@ -7,9 +7,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import ru.pupov.homework05.dao.AuthorDao;
 import ru.pupov.homework05.domain.Author;
-import ru.pupov.homework05.domain.Book;
 
-import java.util.Arrays;
 import java.util.List;
 
 @ShellComponent
@@ -17,8 +15,6 @@ import java.util.List;
 public class AuthorCommands {
 
     public static final String GET_ALL_TAG = "0";
-
-    public static final String BOOK_IDS_DELIMITER = ",";
 
     private final AuthorDao authorDao;
 
@@ -42,7 +38,7 @@ public class AuthorCommands {
             return getResponseFrom(authors);
         } else {
             var author = authorDao.getById(id);
-            return getResponseFrom(List.of(author));
+            return author == null ? "null" : getResponseFrom(List.of(author));
         }
     }
 
@@ -57,16 +53,7 @@ public class AuthorCommands {
         if (author != null) {
             author.setFirstName(firstName);
             author.setLastName(lastName);
-            if (bookIdsString != null && !bookIdsString.equals("null") && !bookIdsString.isBlank()) {
-                author.setBooks(Arrays.stream(bookIdsString.split(BOOK_IDS_DELIMITER))
-                        .map(String::trim)
-                        .map(Long::parseLong)
-                        .map(bookId -> Book.builder().id(bookId).build())
-                        .toList());
-                authorDao.update(author, true);
-            } else {
-                authorDao.update(author, false);
-            }
+            authorDao.update(author, bookIdsString);
             return "Author id %d has been updated".formatted(author.getId());
         }
         return "Could not find the author id %d".formatted(id);
@@ -75,8 +62,8 @@ public class AuthorCommands {
     @ShellMethod(value = "Delete author", key = {"delete-author", "da"})
     public String deleteById(
             @ShellOption(help = "Get id of the Author") Long id) {
-        authorDao.deleteById(id);
-        return "Author id %d was deleted".formatted(id);
+        var result = authorDao.deleteById(id);
+        return result ? "Author id %d was deleted".formatted(id) : "Could not find author id %s".formatted(id);
     }
 
     private String getResponseFrom(List<Author> authors) {

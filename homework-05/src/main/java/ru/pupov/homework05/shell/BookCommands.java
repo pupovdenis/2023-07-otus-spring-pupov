@@ -30,15 +30,10 @@ public class BookCommands {
         if (authorId == null || genreId == null) {
             return "Please, enter author id and genre id";
         }
-        var id = bookDao.insert(Book.builder()
-                .name(name)
-                .author(Author.builder()
-                        .id(authorId)
-                        .build())
-                .genre(Genre.builder()
-                        .id(genreId)
-                        .build())
-                .build());
+        var book = new Book(null, name,
+                new Author(authorId, null, null),
+                new Genre(genreId, null));
+        var id = bookDao.insert(book);
         return "Book id %d was created".formatted(id);
     }
 
@@ -50,8 +45,22 @@ public class BookCommands {
             return getResponseFrom(books);
         } else {
             var book = bookDao.getById(id);
-            return getResponseFrom(List.of(book));
+            return book == null ? "null" : getResponseFrom(List.of(book));
         }
+    }
+
+    @ShellMethod(value = "Get book(s) by author id", key = {"read-book-by-author-id", "rba"})
+    public String readByAuthorId(
+            @ShellOption(help = "Get id of the book by author id") Long authorId) {
+        var book = bookDao.getAllByAuthorId(authorId);
+        return getResponseFrom(book);
+    }
+
+    @ShellMethod(value = "Get book(s) by genre id", key = {"read-book-by-genre-id", "rbg"})
+    public String readByGenreId(
+            @ShellOption(help = "Get id of the book by genre id") Long genreId) {
+        var book = bookDao.getAllByGenreId(genreId);
+        return getResponseFrom(book);
     }
 
     @ShellMethod(value = "Update book", key = {"update-book", "ub"})
@@ -82,10 +91,9 @@ public class BookCommands {
     }
 
     @ShellMethod(value = "Delete book", key = {"delete-book", "db"})
-    public String deleteById(
-            @ShellOption(help = "Get id of the book") Long id) {
-        bookDao.deleteById(id);
-        return "Book id %d was deleted".formatted(id);
+    public String deleteById(@ShellOption(help = "Get id of the book") Long id) {
+        var result = bookDao.deleteById(id);
+        return result ? "Book id %d was deleted".formatted(id) : "Could not find book id %s".formatted(id);
     }
 
     private String getResponseFrom(List<Book> books) {

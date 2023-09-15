@@ -12,7 +12,7 @@ public interface AuthorDao {
 
     List<Author> getAll();
 
-    void update(Author author, boolean withBooks);
+    void update(Author author, String bookIdsString);
 
-    void deleteById(Long id);
+    boolean deleteById(Long id);
 }

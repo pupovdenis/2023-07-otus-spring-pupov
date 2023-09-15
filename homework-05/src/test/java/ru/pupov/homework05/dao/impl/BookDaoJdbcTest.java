@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class BookDaoJdbcTest {
 
     private static final int EXPECTED_BOOKS_LIST_SIZE = 10;
+    public static final int EXPECTED_BOOKS_BY_AUTHOR_ID_LIST_SIZE = 2;
+    public static final int EXPECTED_BOOKS_BY_GENRE_ID_LIST_SIZE = 5;
     private static final long EXISTING_BOOK_1_ID = 1L;
     private static final long EXISTING_BOOK_8_ID = 8L;
     public static final String EXISTING_BOOK_NAME = "Война и мир";
@@ -111,6 +113,50 @@ class BookDaoJdbcTest {
         assertThat(books)
                 .contains(expectedBook)
                 .hasSize(EXPECTED_BOOKS_LIST_SIZE);
+    }
+
+    @DisplayName("возвращать ожидаемый список книг по ИД автора")
+    @Test
+    void shouldReturnExpectedBooksListByAuthorId() {
+        var expectedBook = Book.builder()
+                .id(EXISTING_BOOK_1_ID)
+                .name(BookDaoJdbcTest.EXISTING_BOOK_NAME)
+                .author(Author.builder()
+                        .id(EXISTING_AUTHOR_ID)
+                        .firstName(EXISTING_AUTHOR_FIRST_NAME)
+                        .lastName(EXISTING_AUTHOR_LAST_NAME)
+                        .build())
+                .genre(Genre.builder()
+                        .id(EXISTING_GENRE_ID)
+                        .name(EXISTING_GENRE_NAME)
+                        .build())
+                .build();
+        var books = bookDaoJdbc.getAllByAuthorId(EXISTING_AUTHOR_ID);
+        assertThat(books)
+                .contains(expectedBook)
+                .hasSize(EXPECTED_BOOKS_BY_AUTHOR_ID_LIST_SIZE);
+    }
+
+    @DisplayName("возвращать ожидаемый список книг по ИД жанра")
+    @Test
+    void shouldReturnExpectedBooksListByGenreId() {
+        var expectedBook = Book.builder()
+                .id(EXISTING_BOOK_1_ID)
+                .name(BookDaoJdbcTest.EXISTING_BOOK_NAME)
+                .author(Author.builder()
+                        .id(EXISTING_AUTHOR_ID)
+                        .firstName(EXISTING_AUTHOR_FIRST_NAME)
+                        .lastName(EXISTING_AUTHOR_LAST_NAME)
+                        .build())
+                .genre(Genre.builder()
+                        .id(EXISTING_GENRE_ID)
+                        .name(EXISTING_GENRE_NAME)
+                        .build())
+                .build();
+        var books = bookDaoJdbc.getAllByGenreId(EXISTING_GENRE_ID);
+        assertThat(books)
+                .contains(expectedBook)
+                .hasSize(EXPECTED_BOOKS_BY_GENRE_ID_LIST_SIZE);
     }
 
     @DisplayName("удалять определенную книгу по её id")

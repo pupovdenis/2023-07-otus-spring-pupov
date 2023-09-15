@@ -8,10 +8,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.pupov.homework05.domain.Author;
 import ru.pupov.homework05.domain.Book;
+import ru.pupov.homework05.domain.Genre;
 import ru.pupov.homework05.extractor.AuthorMapper;
 import ru.pupov.homework05.extractor.AuthorsRsExtractor;
+import ru.pupov.homework05.extractor.BookMapper;
+import ru.pupov.homework05.extractor.BooksRsExtractor;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DisplayName("класс AuthorDaoJdbc должен")
 @JdbcTest
-@Import({AuthorDaoJdbc.class, AuthorsRsExtractor.class, AuthorMapper.class})
+@Import({BookDaoJdbc.class, BookMapper.class, BooksRsExtractor.class,
+        AuthorDaoJdbc.class, AuthorsRsExtractor.class, AuthorMapper.class})
 class AuthorDaoJdbcTest {
 
     public static final long EXPECTED_AUTHOR_ID = 6L;
@@ -33,6 +36,12 @@ class AuthorDaoJdbcTest {
     public static final String EXISTING_AUTHOR_LAST_NAME = "Толстой";
     public static final int EXPECTED_AUTHORS = 5;
 
+    public static final long EXISTING_GENRE_1_ID = 1L;
+    public static final String EXISTING_GENRE_1_NAME = "Роман";
+
+    public static final long EXISTING_GENRE_2_ID = 2L;
+    public static final String EXISTING_GENRE_2_NAME = "Сказка";
+
     private static final long EXISTING_BOOK_1_ID = 1L;
     public static final String EXISTING_BOOK_1_NAME = "Война и мир";
 
@@ -44,55 +53,40 @@ class AuthorDaoJdbcTest {
 
     private static final long EXISTING_BOOK_4_ID = 4L;
     public static final String EXISTING_BOOK_4_NAME = "Сказка о царе Салтане";
+    public static final String NEW_BOOK_IDS_STRING = "3,4";
 
+    @Autowired
+    private BooksRsExtractor bookRsExtractor;
+    @Autowired
+    private BookMapper bookMapper;
+    @Autowired
+    private BookDaoJdbc bookDaoJdbc;
     @Autowired
     private AuthorsRsExtractor authorsRsExtractor;
     @Autowired
     private AuthorMapper authorMapper;
     @Autowired
-    AuthorDaoJdbc authorDaoJdbc;
+    private AuthorDaoJdbc authorDaoJdbc;
 
     @DisplayName("возвращать ожидаемого автора по его id")
     @Test
     void shouldReturnExpectedAuthorById() {
-        var books = List.of(
-                Book.builder()
-                        .id(EXISTING_BOOK_1_ID)
-                        .name(EXISTING_BOOK_1_NAME)
-                        .build(),
-                Book.builder()
-                        .id(EXISTING_BOOK_2_ID)
-                        .name(EXISTING_BOOK_2_NAME)
-                        .build()
-        );
         var expectedAuthor = Author.builder()
                 .id(EXISTING_AUTHOR_ID)
                 .firstName(EXISTING_AUTHOR_FIRST_NAME)
                 .lastName(EXISTING_AUTHOR_LAST_NAME)
-                .books(books)
                 .build();
-        var actualAuthor = authorDaoJdbc.getById(expectedAuthor.getId());
+        var actualAuthor = authorDaoJdbc.getById(EXISTING_AUTHOR_ID);
         assertThat(actualAuthor).usingRecursiveComparison().isEqualTo(expectedAuthor);
     }
 
     @DisplayName("возвращать ожидаемый список авторов")
     @Test
-    void shouldReturnExpectedGenresList() {
-        var books = List.of(
-                Book.builder()
-                        .id(EXISTING_BOOK_1_ID)
-                        .name(EXISTING_BOOK_1_NAME)
-                        .build(),
-                Book.builder()
-                        .id(EXISTING_BOOK_2_ID)
-                        .name(EXISTING_BOOK_2_NAME)
-                        .build()
-        );
+    void shouldReturnExpectedAuthorsList() {
         var expectedAuthor = Author.builder()
                 .id(EXISTING_AUTHOR_ID)
                 .firstName(EXISTING_AUTHOR_FIRST_NAME)
                 .lastName(EXISTING_AUTHOR_LAST_NAME)
-                .books(books)
                 .build();
         var actualPersonList = authorDaoJdbc.getAll();
         assertThat(actualPersonList)
@@ -107,16 +101,14 @@ class AuthorDaoJdbcTest {
                 .id(null)
                 .firstName(EXPECTED_AUTHOR_FIRST_NAME)
                 .lastName(EXPECTED_AUTHOR_LAST_NAME)
-                .books(Collections.emptyList())
                 .build();
         authorDaoJdbc.insert(author);
         var expectedAuthor = Author.builder()
                 .id(EXPECTED_AUTHOR_ID)
                 .firstName(EXPECTED_AUTHOR_FIRST_NAME)
                 .lastName(EXPECTED_AUTHOR_LAST_NAME)
-                .books(Collections.emptyList())
                 .build();
-        var actualAuthor = authorDaoJdbc.getById(expectedAuthor.getId());
+        var actualAuthor = authorDaoJdbc.getById(EXPECTED_AUTHOR_ID);
         assertThat(actualAuthor).usingRecursiveComparison().isEqualTo(expectedAuthor);
     }
 
@@ -124,55 +116,79 @@ class AuthorDaoJdbcTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     void shouldInsertAuthorWithBooks() {
-        var actualAuthorBefore = Author.builder()
+        var actualAuthorBefore = authorDaoJdbc.getById(EXISTING_AUTHOR_ID);
+        var expectedAuthorBefore = Author.builder()
                 .id(EXISTING_AUTHOR_ID)
                 .firstName(EXISTING_AUTHOR_FIRST_NAME)
                 .lastName(EXISTING_AUTHOR_LAST_NAME)
-                .books(List.of(
-                        Book.builder()
-                                .id(EXISTING_BOOK_1_ID)
-                                .name(EXISTING_BOOK_1_NAME)
-                                .build(),
-                        Book.builder()
-                                .id(EXISTING_BOOK_2_ID)
-                                .name(EXISTING_BOOK_2_NAME)
-                                .build()))
                 .build();
-        var expectedAuthorBefore = authorDaoJdbc.getById(EXISTING_AUTHOR_ID);
         assertThat(actualAuthorBefore).usingRecursiveComparison().isEqualTo(expectedAuthorBefore);
 
-        var actualAuthorAfter = Author.builder()
+        var actualBookListBefore = bookDaoJdbc.getAllByAuthorId(EXISTING_AUTHOR_ID);
+        var authorBefore = Author.builder()
+                .id(EXISTING_AUTHOR_ID)
+                .firstName(EXISTING_AUTHOR_FIRST_NAME)
+                .lastName(EXISTING_AUTHOR_LAST_NAME)
+                .build();
+        var genreBefore = Genre.builder()
+                .id(EXISTING_GENRE_1_ID)
+                .name(EXISTING_GENRE_1_NAME).build();
+        var expectedBookListBefore = List.of(
+                Book.builder()
+                        .id(EXISTING_BOOK_1_ID)
+                        .name(EXISTING_BOOK_1_NAME)
+                        .author(authorBefore)
+                        .genre(genreBefore)
+                        .build(),
+                Book.builder()
+                        .id(EXISTING_BOOK_2_ID)
+                        .name(EXISTING_BOOK_2_NAME)
+                        .author(authorBefore)
+                        .genre(genreBefore)
+                        .build());
+        assertThat(actualBookListBefore).usingRecursiveComparison().isEqualTo(expectedBookListBefore);
+
+        var updatableAuthor = Author.builder()
                 .id(EXISTING_AUTHOR_ID)
                 .firstName(EXPECTED_AUTHOR_ANOTHER_FIRST_NAME)
                 .lastName(EXPECTED_AUTHOR_ANOTHER_LAST_NAME)
-                .books(List.of(
-                        Book.builder()
-                                .id(EXISTING_BOOK_3_ID)
-                                .name(EXISTING_BOOK_3_NAME)
-                                .build(),
-                        Book.builder()
-                                .id(EXISTING_BOOK_4_ID)
-                                .name(EXISTING_BOOK_4_NAME)
-                                .build()))
                 .build();
-        authorDaoJdbc.update(actualAuthorAfter, true);
+        authorDaoJdbc.update(updatableAuthor, NEW_BOOK_IDS_STRING);
 
+        var actualAuthorAfter = authorDaoJdbc.getById(EXISTING_AUTHOR_ID);
         var expectedAuthorAfter = Author.builder()
                 .id(EXISTING_AUTHOR_ID)
                 .firstName(EXPECTED_AUTHOR_ANOTHER_FIRST_NAME)
                 .lastName(EXPECTED_AUTHOR_ANOTHER_LAST_NAME)
-                .books(List.of(
-                        Book.builder()
-                                .id(EXISTING_BOOK_3_ID)
-                                .name(EXISTING_BOOK_3_NAME)
-                                .build(),
-                        Book.builder()
-                                .id(EXISTING_BOOK_4_ID)
-                                .name(EXISTING_BOOK_4_NAME)
-                                .build()))
                 .build();
-        var actualAuthor = authorDaoJdbc.getById(EXISTING_AUTHOR_ID);
-        assertThat(actualAuthor).usingRecursiveComparison().isEqualTo(expectedAuthorAfter);
+        assertThat(actualAuthorAfter).usingRecursiveComparison().isEqualTo(expectedAuthorAfter);
+
+        var actualBookListAfter = bookDaoJdbc.getAllByAuthorId(EXISTING_AUTHOR_ID);
+        var authorAfter = Author.builder()
+                .id(EXISTING_AUTHOR_ID)
+                .firstName(EXPECTED_AUTHOR_ANOTHER_FIRST_NAME)
+                .lastName(EXPECTED_AUTHOR_ANOTHER_LAST_NAME)
+                .build();
+        var genre1After = Genre.builder()
+                .id(EXISTING_GENRE_1_ID)
+                .name(EXISTING_GENRE_1_NAME).build();
+        var genre2After = Genre.builder()
+                .id(EXISTING_GENRE_2_ID)
+                .name(EXISTING_GENRE_2_NAME).build();
+        var expectedBookListAfter = List.of(
+                Book.builder()
+                        .id(EXISTING_BOOK_3_ID)
+                        .name(EXISTING_BOOK_3_NAME)
+                        .author(authorAfter)
+                        .genre(genre1After)
+                        .build(),
+                Book.builder()
+                        .id(EXISTING_BOOK_4_ID)
+                        .name(EXISTING_BOOK_4_NAME)
+                        .author(authorAfter)
+                        .genre(genre2After)
+                        .build());
+        assertThat(actualBookListAfter).usingRecursiveComparison().isEqualTo(expectedBookListAfter);
     }
 
     @DisplayName("удалять определенного автора по его id")
