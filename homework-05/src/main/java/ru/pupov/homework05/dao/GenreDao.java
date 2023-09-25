@@ -12,7 +12,7 @@ public interface GenreDao {
 
     List<Genre> getAll();
 
-    void update(Genre genre, String bookIdsString);
+    void update(Genre genre);
 
     boolean deleteById(Long id);
 }

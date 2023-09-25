@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.pupov.homework05.dao.GenreDao;
 import ru.pupov.homework05.domain.Genre;
 import ru.pupov.homework05.extractor.GenreMapper;
@@ -19,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 
 @Repository
-@Transactional(readOnly = true)
 public class GenreDaoJdbc implements GenreDao {
 
     public static final String BOOK_IDS_DELIMITER = ",";
@@ -45,12 +43,7 @@ public class GenreDaoJdbc implements GenreDao {
     }
 
     @Override
-    @Transactional
     public Long insert(Genre genre) {
-        if (genre.getId() != null) {
-            throw new RuntimeException("before inserting genre must be without id");
-        }
-
         var mapSqlParameterSource = new MapSqlParameterSource();
         mapSqlParameterSource.addValue("name", genre.getName());
 
@@ -84,48 +77,10 @@ public class GenreDaoJdbc implements GenreDao {
     }
 
     @Override
-    @Transactional
-    public void update(Genre genre, String bookIdsString) {
+    public void update(Genre genre) {
         var params = new HashMap<String, Object>();
         params.put("id", genre.getId());
         params.put("name", genre.getName());
-        if (bookIdsString != null && !bookIdsString.equals("null") && !bookIdsString.isBlank()) {
-            List<Long> bookIds;
-            try {
-                bookIds = Arrays.stream(bookIdsString.split(BOOK_IDS_DELIMITER))
-                        .map(String::trim)
-                        .map(Long::parseLong)
-                        .toList();
-            } catch (Exception e) {
-                throw new RuntimeException("invalid book ids input data");
-            }
-            params.put("bookIds", bookIds);
-            doUpdateWithBooks(params);
-        } else {
-            doUpdate(params);
-        }
-    }
-
-    private void doUpdateWithBooks(Map<String, Object> params) {
-        namedParameterJdbcOperations.update("""
-                update genre
-                set name=:name
-                where id=:id;
-                """, params);
-        namedParameterJdbcOperations.update("""
-                update book b
-                set b.genre_id = null
-                where genre_id=:id
-                	and b.id not in (:bookIds);
-                """, params);
-        namedParameterJdbcOperations.update("""
-                update book
-                set genre_id=:id
-                where id in (:bookIds);
-                """, params);
-    }
-
-    private void doUpdate(Map<String, Object> params) {
         namedParameterJdbcOperations.update("""
                 update genre
                 set name=:name

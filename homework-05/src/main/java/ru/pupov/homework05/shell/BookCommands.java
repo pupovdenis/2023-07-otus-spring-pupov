@@ -5,10 +5,10 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import ru.pupov.homework05.dao.BookDao;
 import ru.pupov.homework05.domain.Author;
 import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.domain.Genre;
+import ru.pupov.homework05.service.BookService;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,7 +19,7 @@ public class BookCommands {
 
     public static final String GET_ALL_TAG = "0";
 
-    private final BookDao bookDao;
+    private final BookService bookService;
 
     private final ConversionService conversionService;
 
@@ -33,18 +33,18 @@ public class BookCommands {
         var book = new Book(null, name,
                 new Author(authorId, null, null),
                 new Genre(genreId, null));
-        var id = bookDao.insert(book);
-        return "Book id %d was created".formatted(id);
+        var id = bookService.create(book);
+        return id == null ? "Failed to create book" : "Book id %d was created".formatted(id);
     }
 
     @ShellMethod(value = "Get book(s)", key = {"read-book", "rb"})
     public String read(
             @ShellOption(help = "Get id of the book. '0' - for all books", defaultValue = GET_ALL_TAG) Long id) {
         if (GET_ALL_TAG.equals(id.toString())) {
-            var books = bookDao.getAll();
+            var books = bookService.getAll();
             return getResponseFrom(books);
         } else {
-            var book = bookDao.getById(id);
+            var book = bookService.getById(id);
             return book == null ? "null" : getResponseFrom(List.of(book));
         }
     }
@@ -52,14 +52,14 @@ public class BookCommands {
     @ShellMethod(value = "Get book(s) by author id", key = {"read-book-by-author-id", "rba"})
     public String readByAuthorId(
             @ShellOption(help = "Get id of the book by author id") Long authorId) {
-        var book = bookDao.getAllByAuthorId(authorId);
-        return getResponseFrom(book);
+        var books = bookService.getAllByAuthorId(authorId);
+        return getResponseFrom(books);
     }
 
     @ShellMethod(value = "Get book(s) by genre id", key = {"read-book-by-genre-id", "rbg"})
     public String readByGenreId(
             @ShellOption(help = "Get id of the book by genre id") Long genreId) {
-        var book = bookDao.getAllByGenreId(genreId);
+        var book = bookService.getAllByGenreId(genreId);
         return getResponseFrom(book);
     }
 
@@ -69,7 +69,7 @@ public class BookCommands {
             @ShellOption(help = "Get new name") String name,
             @ShellOption(help = "Get new author_id", value = "--author") Long authorId,
             @ShellOption(help = "Get new genre_id", value = "--genre") Long genreId) {
-        var book = bookDao.getById(id);
+        var book = bookService.getById(id);
         if (book != null) {
             if (name != null && !name.isBlank()) {
                 book.setName(name);
@@ -84,7 +84,7 @@ public class BookCommands {
                         .id(genreId)
                         .build());
             }
-            bookDao.update(book);
+            bookService.update(book);
             return "Book id %d has been updated".formatted(book.getId());
         }
         return "Could not find the book id %d".formatted(id);
@@ -92,7 +92,7 @@ public class BookCommands {
 
     @ShellMethod(value = "Delete book", key = {"delete-book", "db"})
     public String deleteById(@ShellOption(help = "Get id of the book") Long id) {
-        var result = bookDao.deleteById(id);
+        var result = bookService.deleteById(id);
         return result ? "Book id %d was deleted".formatted(id) : "Could not find book id %s".formatted(id);
     }
 

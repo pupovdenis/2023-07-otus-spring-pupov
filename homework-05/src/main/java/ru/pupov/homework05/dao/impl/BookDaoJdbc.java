@@ -6,11 +6,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.pupov.homework05.dao.BookDao;
 import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.extractor.BookMapper;
-import ru.pupov.homework05.extractor.BooksRsExtractor;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +16,6 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 @Repository
-@Transactional(readOnly = true)
 public class BookDaoJdbc implements BookDao {
 
     private final NamedParameterJdbcOperations namedParameterJdbcOperations;
@@ -27,34 +24,26 @@ public class BookDaoJdbc implements BookDao {
 
     private final BookMapper bookMapper;
 
-    private final BooksRsExtractor booksRsExtractor;
-
     public BookDaoJdbc(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
                                NamedParameterJdbcOperations namedParameterJdbcOperations,
-                       BookMapper bookMapper,
-                       BooksRsExtractor booksRsExtractor) {
+                       BookMapper bookMapper) {
         this.namedParameterJdbcOperations = namedParameterJdbcOperations;
         this.bookMapper = bookMapper;
-        this.booksRsExtractor = booksRsExtractor;
         keyHolder = new GeneratedKeyHolder();
     }
 
 
 
     @Override
-    @Transactional
     public Long insert(Book book) {
-        if (book.getId() != null) {
-            throw new RuntimeException("before inserting book must be without id");
-        }
         var mapSqlParameterSource = new MapSqlParameterSource();
         mapSqlParameterSource.addValue("name", book.getName());
         mapSqlParameterSource.addValue("authorId", book.getAuthor().getId());
         mapSqlParameterSource.addValue("genreId", book.getGenre().getId());
 
         namedParameterJdbcOperations.update("""
-                insert into book (id, name, author_id, genre_id)
-                values (nextval('book_id_seq'), :name, :authorId, :genreId)
+                insert into book (name, author_id, genre_id)
+                values (:name, :authorId, :genreId)
                 """, mapSqlParameterSource, keyHolder);
         return requireNonNull(keyHolder.getKey()).longValue();
     }
@@ -82,11 +71,10 @@ public class BookDaoJdbc implements BookDao {
                 from book b
                 left join author a on a.id = b.author_id
                 left join genre g on g.id = b.genre_id
-                """, booksRsExtractor);
+                """, bookMapper);
     }
 
     @Override
-    @Transactional
     public void update(Book book) {
         Map<String, Object> params = Map.of(
                 "id", book.getId(),
@@ -101,7 +89,6 @@ public class BookDaoJdbc implements BookDao {
     }
 
     @Override
-    @Transactional
     public boolean deleteById(Long id) {
         var params = Map.of("id", id);
         var result = namedParameterJdbcOperations.update("""
@@ -120,7 +107,7 @@ public class BookDaoJdbc implements BookDao {
                 join author a on a.id = b.author_id
                 left join genre g on g.id = b.genre_id
                 where a.id=:authorId
-                """, params, booksRsExtractor);
+                """, params, bookMapper);
     }
 
     @Override
@@ -132,6 +119,6 @@ public class BookDaoJdbc implements BookDao {
                 left join author a on a.id = b.author_id
                 join genre g on g.id = b.genre_id
                 where g.id=:genreId
-                """, params, booksRsExtractor);
+                """, params, bookMapper);
     }
 }

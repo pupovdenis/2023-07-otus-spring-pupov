@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.pupov.homework05.dao.AuthorDao;
 import ru.pupov.homework05.domain.Author;
 import ru.pupov.homework05.extractor.AuthorMapper;
@@ -19,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 
 @Repository
-@Transactional(readOnly = true)
 public class AuthorDaoJdbc implements AuthorDao {
 
     public static final String BOOK_IDS_DELIMITER = ",";
@@ -43,11 +41,7 @@ public class AuthorDaoJdbc implements AuthorDao {
     }
 
     @Override
-    @Transactional
     public Long insert(Author author) {
-        if (author.getId() != null) {
-            throw new RuntimeException("before inserting author must be without id");
-        }
         var mapSqlParameterSource = new MapSqlParameterSource();
         mapSqlParameterSource.addValue("firstName", author.getFirstName());
         mapSqlParameterSource.addValue("lastName", author.getLastName());
@@ -82,49 +76,11 @@ public class AuthorDaoJdbc implements AuthorDao {
     }
 
     @Override
-    @Transactional
-    public void update(Author author, String bookIdsString) {
+    public void update(Author author) {
         var params = new HashMap<String, Object>();
         params.put("id", author.getId());
         params.put("firstName", author.getFirstName());
         params.put("lastName", author.getLastName());
-        if (bookIdsString != null && !bookIdsString.equals("null") && !bookIdsString.isBlank()) {
-            List<Long> bookIds;
-            try {
-                bookIds = Arrays.stream(bookIdsString.split(BOOK_IDS_DELIMITER))
-                        .map(String::trim)
-                        .map(Long::parseLong)
-                        .toList();
-            } catch (Exception e) {
-                throw new RuntimeException("invalid book ids input data");
-            }
-            params.put("bookIds", bookIds);
-            doUpdateWithBooks(params);
-        } else {
-            doUpdate(params);
-        }
-    }
-
-    private void doUpdateWithBooks(Map<String, Object> params) {
-        namedParameterJdbcOperations.update("""
-                update author
-                set first_name=:firstName, last_name=:lastName
-                where id=:id;
-                """, params);
-        namedParameterJdbcOperations.update("""
-                update book b
-                set b.author_id = null
-                where author_id=:id
-                	and b.id not in (:bookIds);
-                """, params);
-        namedParameterJdbcOperations.update("""
-                update book
-                set author_id=:id
-                where id in (:bookIds);
-                """, params);
-    }
-
-    private void doUpdate(Map<String, Object> params) {
         namedParameterJdbcOperations.update("""
                 update author
                 set first_name=:firstName, last_name=:lastName
@@ -133,7 +89,6 @@ public class AuthorDaoJdbc implements AuthorDao {
     }
 
     @Override
-    @Transactional
     public boolean deleteById(Long id) {
         var params = Map.of("id", id);
         namedParameterJdbcOperations.update("""

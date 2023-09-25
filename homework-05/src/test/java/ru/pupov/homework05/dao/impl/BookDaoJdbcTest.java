@@ -10,14 +10,13 @@ import ru.pupov.homework05.domain.Author;
 import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.domain.Genre;
 import ru.pupov.homework05.extractor.BookMapper;
-import ru.pupov.homework05.extractor.BooksRsExtractor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DisplayName("класс BookDaoJdbcTest должен")
 @JdbcTest
-@Import({BookDaoJdbc.class, BookMapper.class, BooksRsExtractor.class})
+@Import({BookDaoJdbc.class, BookMapper.class})
 class BookDaoJdbcTest {
 
     private static final int EXPECTED_BOOKS_LIST_SIZE = 10;
@@ -35,8 +34,6 @@ class BookDaoJdbcTest {
     public static final long EXPECTED_NEW_BOOK_ID = 11L;
     public static final String ID_FIELD_NAME = "id";
 
-    @Autowired
-    private BooksRsExtractor booksRsExtractor;
     @Autowired
     private BookMapper bookMapper;
     @Autowired
