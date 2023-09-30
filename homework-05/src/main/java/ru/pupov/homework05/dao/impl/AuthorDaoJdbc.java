@@ -8,10 +8,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.pupov.homework05.dao.AuthorDao;
 import ru.pupov.homework05.domain.Author;
-import ru.pupov.homework05.extractor.AuthorMapper;
-import ru.pupov.homework05.extractor.AuthorsRsExtractor;
+import ru.pupov.homework05.mapper.AuthorMapper;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,23 +18,17 @@ import java.util.Objects;
 @Repository
 public class AuthorDaoJdbc implements AuthorDao {
 
-    public static final String BOOK_IDS_DELIMITER = ",";
-
     private final NamedParameterJdbcOperations namedParameterJdbcOperations;
 
     private final KeyHolder keyHolder;
 
     private final AuthorMapper authorMapper;
 
-    private final AuthorsRsExtractor authorsRsExtractor;
-
     public AuthorDaoJdbc(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
                                  NamedParameterJdbcOperations namedParameterJdbcOperations,
-                         AuthorMapper authorMapper,
-                         AuthorsRsExtractor authorsRsExtractor) {
+                         AuthorMapper authorMapper) {
         this.namedParameterJdbcOperations = namedParameterJdbcOperations;
         this.authorMapper = authorMapper;
-        this.authorsRsExtractor = authorsRsExtractor;
         keyHolder = new GeneratedKeyHolder();
     }
 
@@ -72,7 +64,7 @@ public class AuthorDaoJdbc implements AuthorDao {
         return namedParameterJdbcOperations.query("""
                 select a.id, a.first_name, a.last_name
                 from author a
-                """, authorsRsExtractor);
+                """, authorMapper);
     }
 
     @Override

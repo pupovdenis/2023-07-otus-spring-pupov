@@ -8,7 +8,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.pupov.homework05.dao.BookDao;
 import ru.pupov.homework05.domain.Book;
-import ru.pupov.homework05.extractor.BookMapper;
+import ru.pupov.homework05.mapper.BookMapper;
 
 import java.util.List;
 import java.util.Map;

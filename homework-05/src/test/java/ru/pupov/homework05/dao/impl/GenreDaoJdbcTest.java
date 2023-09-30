@@ -6,21 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.pupov.homework05.domain.Author;
-import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.domain.Genre;
-import ru.pupov.homework05.extractor.BookMapper;
-import ru.pupov.homework05.extractor.GenreMapper;
-import ru.pupov.homework05.extractor.GenresRsExtractor;
-
-import java.util.List;
+import ru.pupov.homework05.mapper.GenreMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DisplayName("класс GenreDaoJdbc должен")
 @JdbcTest
-@Import({GenreDaoJdbc.class, GenresRsExtractor.class, GenreMapper.class})
+@Import({GenreDaoJdbc.class, GenreMapper.class})
 class GenreDaoJdbcTest {
 
     private static final long EXISTING_GENRE_ID = 6L;
@@ -34,8 +28,6 @@ class GenreDaoJdbcTest {
 
     @Autowired
     private GenreMapper genreMapper;
-    @Autowired
-    GenresRsExtractor genresRsExtractor;
     @Autowired
     private GenreDaoJdbc genreDaoJdbc;
 

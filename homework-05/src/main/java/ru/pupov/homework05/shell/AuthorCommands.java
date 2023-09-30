@@ -14,8 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthorCommands {
 
-    public static final String GET_ALL_TAG = "0";
-
     private final AuthorService authorService;
 
     private final ConversionService conversionService;
@@ -30,16 +28,16 @@ public class AuthorCommands {
         return id == null ? "Failed to create author" : "Author id %d was created".formatted(id);
     }
 
-    @ShellMethod(value = "Get author(s)", key = {"read-author", "ra"})
-    public String read(
-            @ShellOption(help = "Get id of the author. '0' - for all authors", defaultValue = GET_ALL_TAG) Long id) {
-        if (GET_ALL_TAG.equals(id.toString())) {
-            var authors = authorService.getAll();
-            return getResponseFrom(authors);
-        } else {
-            var author = authorService.getById(id);
-            return author == null ? "null" : getResponseFrom(List.of(author));
-        }
+    @ShellMethod(value = "Get author by id", key = {"read-author", "ra"})
+    public String readById(@ShellOption(help = "Get id of the author") Long id) {
+        var author = authorService.getById(id);
+        return author == null ? "null" : getResponseFrom(List.of(author));
+    }
+
+    @ShellMethod(value = "Get authors", key = {"read-all-authors", "ras"})
+    public String readAll() {
+        var authors = authorService.getAll();
+        return getResponseFrom(authors);
     }
 
     @ShellMethod(value = "Update author", key = {"update-author", "ua"})

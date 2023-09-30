@@ -1,4 +1,4 @@
-package ru.pupov.homework05.extractor;
+package ru.pupov.homework05.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;

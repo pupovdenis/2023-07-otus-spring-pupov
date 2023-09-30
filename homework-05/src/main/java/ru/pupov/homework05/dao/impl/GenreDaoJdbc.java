@@ -8,10 +8,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.pupov.homework05.dao.GenreDao;
 import ru.pupov.homework05.domain.Genre;
-import ru.pupov.homework05.extractor.GenreMapper;
-import ru.pupov.homework05.extractor.GenresRsExtractor;
+import ru.pupov.homework05.mapper.GenreMapper;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,25 +18,17 @@ import java.util.Objects;
 @Repository
 public class GenreDaoJdbc implements GenreDao {
 
-    public static final String BOOK_IDS_DELIMITER = ",";
-
-    public static final String SQL_IDS_DELIMITER = ",";
-
     private final NamedParameterJdbcOperations namedParameterJdbcOperations;
 
     private final KeyHolder keyHolder;
 
     private final GenreMapper genreMapper;
 
-    private final GenresRsExtractor genresRsExtractor;
-
     public GenreDaoJdbc(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
                                 NamedParameterJdbcOperations namedParameterJdbcOperations,
-                        GenreMapper genreMapper,
-                        GenresRsExtractor genresRsExtractor) {
+                        GenreMapper genreMapper) {
         this.namedParameterJdbcOperations = namedParameterJdbcOperations;
         this.genreMapper = genreMapper;
-        this.genresRsExtractor = genresRsExtractor;
         keyHolder = new GeneratedKeyHolder();
     }
 
@@ -73,7 +63,7 @@ public class GenreDaoJdbc implements GenreDao {
         return namedParameterJdbcOperations.query("""
                 select g.id, g.name
                 from genre g
-                """, genresRsExtractor);
+                """, genreMapper);
     }
 
     @Override

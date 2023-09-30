@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.pupov.homework05.dao.BookDao;
+import ru.pupov.homework05.domain.Author;
 import ru.pupov.homework05.domain.Book;
+import ru.pupov.homework05.domain.Genre;
 import ru.pupov.homework05.service.BookService;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +59,20 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public void update(Book book) {
+    public void update(Book book, String name, Long authorId, Long genreId) {
+        if (name != null && !name.isBlank()) {
+            book.setName(name);
+        }
+        if (authorId != null && !Objects.equals(authorId, book.getAuthor().getId())) {
+            book.setAuthor(Author.builder()
+                    .id(authorId)
+                    .build());
+        }
+        if (genreId != null && !Objects.equals(genreId, book.getGenre().getId())) {
+            book.setGenre(Genre.builder()
+                    .id(genreId)
+                    .build());
+        }
         bookDao.update(book);
     }
 }

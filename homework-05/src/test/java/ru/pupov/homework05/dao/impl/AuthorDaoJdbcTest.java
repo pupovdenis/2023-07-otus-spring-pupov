@@ -7,20 +7,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.pupov.homework05.domain.Author;
-import ru.pupov.homework05.domain.Book;
-import ru.pupov.homework05.domain.Genre;
-import ru.pupov.homework05.extractor.AuthorMapper;
-import ru.pupov.homework05.extractor.AuthorsRsExtractor;
-import ru.pupov.homework05.extractor.BookMapper;
-
-import java.util.List;
+import ru.pupov.homework05.mapper.AuthorMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DisplayName("класс AuthorDaoJdbc должен")
 @JdbcTest
-@Import({AuthorDaoJdbc.class, AuthorsRsExtractor.class, AuthorMapper.class})
+@Import({AuthorDaoJdbc.class, AuthorMapper.class})
 class AuthorDaoJdbcTest {
 
     public static final long EXPECTED_AUTHOR_ID = 6L;
@@ -34,7 +28,6 @@ class AuthorDaoJdbcTest {
     public static final String EXISTING_AUTHOR_LAST_NAME = "Толстой";
     public static final int EXPECTED_AUTHORS = 5;
 
-    private AuthorsRsExtractor authorsRsExtractor;
     @Autowired
     private AuthorMapper authorMapper;
     @Autowired

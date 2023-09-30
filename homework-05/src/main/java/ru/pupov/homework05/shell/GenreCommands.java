@@ -14,8 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreCommands {
 
-    public static final String GET_ALL_TAG = "0";
-
     private final GenreService genreService;
 
     private final ConversionService conversionService;
@@ -28,16 +26,16 @@ public class GenreCommands {
         return id == null ? "Failed to create genre" : "Genre id %d was created".formatted(id);
     }
 
-    @ShellMethod(value = "Get genre(s)", key = {"read-genre", "rg"})
-    public String read(
-            @ShellOption(help = "Get id of the genre. '0' - for all genres", defaultValue = GET_ALL_TAG) Long id) {
-        if (GET_ALL_TAG.equals(id.toString())) {
-            var genres = genreService.getAll();
-            return getResponseFrom(genres);
-        } else {
-            var genre = genreService.getById(id);
-            return genre == null ? "null" : getResponseFrom(List.of(genre));
-        }
+    @ShellMethod(value = "Get genre by id", key = {"read-genre", "rg"})
+    public String readById(@ShellOption(help = "Get id of the genre") Long id) {
+        var genre = genreService.getById(id);
+        return genre == null ? "null" : getResponseFrom(List.of(genre));
+    }
+
+    @ShellMethod(value = "Get genres", key = {"read-all-genres", "rgs"})
+    public String readAll() {
+        var genres = genreService.getAll();
+        return getResponseFrom(genres);
     }
 
     @ShellMethod(value = "Update genre", key = {"update-genre", "ug"})

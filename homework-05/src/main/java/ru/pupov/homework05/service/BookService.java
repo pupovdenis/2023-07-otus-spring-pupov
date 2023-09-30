@@ -21,5 +21,5 @@ public interface BookService {
     boolean deleteById(Long id);
 
     @Transactional
-    void update(Book book);
+    void update(Book book, String name, Long authorId, Long genreId);
 }

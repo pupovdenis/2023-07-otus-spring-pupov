@@ -9,7 +9,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.pupov.homework05.domain.Author;
 import ru.pupov.homework05.domain.Book;
 import ru.pupov.homework05.domain.Genre;
-import ru.pupov.homework05.extractor.BookMapper;
+import ru.pupov.homework05.mapper.BookMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
