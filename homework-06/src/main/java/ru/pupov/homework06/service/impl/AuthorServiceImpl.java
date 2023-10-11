@@ -15,7 +15,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class AuthorServiceImpl implements AuthorService {
 
@@ -44,18 +43,21 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AuthorDto> getAll() {
         var authors = authorRepository.findAll();
         return authorMapper.toDtoList(authors);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<AuthorDto> getById(Long id) {
         return authorRepository.findById(id)
                 .map(authorMapper::toDto);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Author> findById(Long id) {
         return authorRepository.findById(id);
     }

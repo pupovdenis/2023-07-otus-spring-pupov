@@ -18,6 +18,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.List;
 
@@ -31,16 +33,11 @@ import java.util.List;
 @NamedEntityGraph(name = "book-entity-graph",
         attributeNodes = {
                 @NamedAttributeNode("author"),
-                @NamedAttributeNode("genre"),
-                @NamedAttributeNode("comments")})
+                @NamedAttributeNode("genre")})
 @NamedEntityGraph(name = "books-by-author-entity-graph",
-        attributeNodes = {
-                @NamedAttributeNode("genre"),
-                @NamedAttributeNode("comments")})
+        attributeNodes = @NamedAttributeNode("genre"))
 @NamedEntityGraph(name = "books-by-genre-entity-graph",
-        attributeNodes = {
-                @NamedAttributeNode("author"),
-                @NamedAttributeNode("comments")})
+        attributeNodes = @NamedAttributeNode("author"))
 public class Book {
 
     @Id
@@ -59,6 +56,7 @@ public class Book {
     @JoinColumn(name = "genre_id")
     private Genre genre;
 
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 

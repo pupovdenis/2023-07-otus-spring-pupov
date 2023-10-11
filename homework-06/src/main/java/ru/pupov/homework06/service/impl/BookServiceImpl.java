@@ -17,7 +17,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class BookServiceImpl implements BookService {
 
@@ -53,29 +52,34 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookDto> getAll() {
         var books = bookRepository.findAll();
         return bookMapper.toDtoList(books);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<BookDto> getById(Long id) {
         return bookRepository.findById(id)
                 .map(bookMapper::toDto);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Book> findById(Long id) {
         return bookRepository.findById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookDto> getAllByAuthorId(Long authorId) {
         var books = bookRepository.findByAuthorId(authorId);
         return bookMapper.toDtoListWithoutAuthor(books);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookDto> getAllByGenreId(Long genreId) {
         var books = bookRepository.findByGenreId(genreId);
         return bookMapper.toDtoListWithoutGenre(books);

@@ -15,7 +15,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class GenreServiceImpl implements GenreService {
 
@@ -41,17 +40,20 @@ public class GenreServiceImpl implements GenreService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GenreDto> getAll() {
         var genres = genreRepository.findAll();
         return genreMapper.toDtoList(genres);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Genre> findById(Long id) {
         return genreRepository.findById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<GenreDto> getById(Long id) {
         return genreRepository.findById(id)
                 .map(genreMapper::toDto);

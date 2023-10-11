@@ -88,7 +88,7 @@ class BookRepositoryJpaTest {
     @Test
     void shouldFindAllBooksByAuthorId() {
         var books = bookRepository.findByAuthorId(FIRST_AUTHOR_ID);
-        assertThat(books).hasSize(FIRST_AUTHOR_BOOKS_COUNT);
+        assertThat(books).isNotNull().hasSize(FIRST_AUTHOR_BOOKS_COUNT);
     }
 
     @DisplayName("возвращать список всех книг по id жанра")
