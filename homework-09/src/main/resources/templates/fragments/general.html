@@ -1,0 +1,14 @@
+<!DOCTYPE HTML>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="fragments">
+    <meta charset="UTF-8" />
+    <title>Fragments</title>
+</head>
+<body>
+
+<div th:fragment="home_page_button">
+    <div><a href="#" th:href="@{/book}" th:text="#{home-page-button}">Home page</a></div>
+</div>
+
+</body>
+</html>

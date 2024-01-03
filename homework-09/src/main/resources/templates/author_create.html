@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit book</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+        .errors {
+            color: red;
+        }
+    </style>
+
+    <style type="text/css" th:inline="text">
+        [[h3]] {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/general.html :: home_page_button"></div>
+
+<h3 th:text="#{lang-switcher-header}">Select language</h3>
+<div>
+    <div><a href="#" th:href="@{/author/create(lang=en)}" th:text="#{en-lang-switch-button-caption}">Language - EN</a></div>
+    <div><a href="#" th:href="@{/author/create(lang=ru)}" th:text="#{ru-lang-switch-button-caption}">Language - RU</a></div>
+</div>
+
+<form id="create-form" action="author_create.html" th:action="@{/author/create}" th:method="post" th:object="${author}">
+    <h3 th:text = "#{author-form-header}">Author Info:</h3>
+
+    <div class="row">
+        <label for="author-firstname-input" th:text="#{author-field-firstname} + ':'">Firstname:</label>
+        <input id="author-firstname-input" name="firstname" type="text" placeholder="Enter author firstname" th:placeholder="#{author-placeholder-firstname}"/>
+        <div class="errors" th:if="${#fields.hasErrors('firstname')}" th:errors="*{firstname}">Wrong author firstname error</div>
+    </div>
+
+    <div class="row">
+        <label for="author-lastname-input" th:text="#{author-field-lastname} + ':'">Lastname:</label>
+        <input id="author-lastname-input" name="lastname" type="text" placeholder="Enter author lastname" th:placeholder="#{author-placeholder-lastname}"/>
+        <div class="errors" th:if="${#fields.hasErrors('lastname')}" th:errors="*{lastname}">Wrong author lastname error</div>
+    </div>
+
+    <input type="hidden" th:if="${redirect != null}" th:value="${redirect}" name="redirect" />
+
+    <div class="row">
+        <button type="submit" th:text="#{save-button-caption}">Save</button>
+        <a href="book_list.html" th:href="@{/book}"><button type="button" th:text="#{cancel-button-caption}">Cancel</button></a>
+    </div>
+</form>
+
+</body>
+</html>
