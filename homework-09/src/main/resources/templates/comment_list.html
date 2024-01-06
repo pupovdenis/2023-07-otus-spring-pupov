@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all books</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        .books {
+            border: 1px solid steelblue;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .books tr td, th {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+
+        .books td:last-child, td:first-child {
+            width: 50px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+    </style>
+
+    <style type="text/css" th:inline="text">
+        [[h3]] {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/general.html :: home_page_button"></div>
+
+<h3 th:text="#{lang-switcher-header}">Select language</h3>
+<div>
+    <div><a href="#" th:href="@{/comments/{id}(id=${bookId}, lang=en)}" th:text="#{en-lang-switch-button-caption}">Language - EN</a></div>
+    <div><a href="#" th:href="@{/comments/{id}(id=${bookId}, lang=ru)}" th:text="#{ru-lang-switch-button-caption}">Language - RU</a></div>
+</div>
+
+<h3 th:text="#{comments-table-header(${bookId})}">Book comments:</h3>
+
+<form id="edit-form" th:if="${editCommentId != null}" th:action="@{/comments/{bookId}/edit/{commentId}(bookId=${bookId}, commentId=${editCommentId})}" th:method="post" th:object="${editComment}">
+
+    <h4 th:text = "#{comment-edit-header(${editCommentId})}">Edit comment:</h4>
+
+    <div class="row">
+        <label for="comment-text-input" th:text="#{comment-field-text} + ':'">Text:</label>
+        <input autofocus maxlength="255" size="60" id="comment-text-input" name="text" type="text" th:value="*{text}" value="Awesome text"/>
+        <button type="submit" th:text="#{update-button-caption}">Update</button>
+        <a th:href="@{/comments/{id}(id=${bookId})}"><button type="button" th:text="#{cancel-button-caption}">Cancel</button></a>
+    </div>
+    <br><br>
+
+    <input type="hidden" th:if="${bookId != null}" th:value="${bookId}" name="bookId" />
+    <input type="hidden" th:if="${editCommentId != null}" th:value="${editCommentId}" name="editCommentId" />
+</form>
+
+<table class="books">
+    <thead>
+    <tr>
+        <th th:text="#{comment-field-id}">ID</th>
+        <th th:text="#{comment-field-text}">Text</th>
+        <th th:text="#{comment-table-column-action}">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="comment : ${comments}">
+        <td th:text="${comment.id}">1</td>
+        <td th:text="${comment.text}">Awesome text</td>
+        <td>
+            <a th:href="@{/comments/{bookId}/edit/{commentId}(bookId=${bookId}, commentId=${comment.id})}" th:text="#{edit-button-caption}">Edit</a>
+            <a th:href="@{/comments/{bookId}/delete/{commentId}(bookId=${bookId}, commentId=${comment.id})}" th:text="#{delete-button-caption}">Delete</a><br><br>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div class="errors" th:if="${exception}" th:text="${exception}">Exception</div><br><br>
+
+<form id="add-form" th:if="${editCommentId == null}" th:action="@{/comments/{bookId}/add(bookId=${bookId})}" th:method="post" th:object="${addComment}">
+
+    <h4 th:text = "#{comment-add-header}">Add comment:</h4>
+
+    <div class="row">
+        <label for="add-comment-text-input" th:text="#{comment-field-text} + ':'">Text:</label>
+        <input autofocus maxlength="255" size="60" id="add-comment-text-input" name="text" type="text" th:value="*{text}" value="Awesome text"/>
+        <div class="errors" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Wrong comment text error</div>
+        <button type="submit" th:text="#{add-button-caption}">Add</button>
+        <br><br>
+    </div>
+
+    <input type="hidden" th:if="${bookId != null}" th:value="${bookId}" name="bookId" />
+</form>
+
+<div class="errors" th:if="${exception}" th:text="${exception}">Exception</div>
+
+</body>
+</html>
