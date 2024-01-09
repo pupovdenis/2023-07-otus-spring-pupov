@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all authors</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        .authors {
+            border: 1px solid steelblue;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .authors tr td, th {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+
+        .authors td:last-child, td:first-child {
+            width: 50px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        h3 {
+            background-image: url("../static/listmark.png");
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+    </style>
+
+    <style type="text/css" th:inline="text">
+        [[h3]] {
+            background-image: url([[@{/listmark.png}]]);
+            background-repeat: no-repeat;
+            padding: 2px;
+            padding-left: 30px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/general.html :: home_page_button"></div>
+
+<h3 th:text="#{lang-switcher-header}">Select language</h3>
+<div>
+    <div><a href="#" th:href="@{/author(lang=en)}" th:text="#{en-lang-switch-button-caption}">Language - EN</a></div>
+    <div><a href="#" th:href="@{/author(lang=ru)}" th:text="#{ru-lang-switch-button-caption}">Language - RU</a></div>
+</div>
+
+<h3 th:text="#{authors-table-header}">Authors:</h3>
+
+<div><a href="#" th:href="@{/author/create}" th:text="#{create-author-button-caption}">Create author</a><br></div>
+
+<table class="authors">
+    <thead>
+    <tr>
+        <th th:text="#{author-field-id}">ID</th>
+        <th th:text="#{author-field-firstname}">Firstname</th>
+        <th th:text="#{author-field-lastname}">Lastname</th>
+        <th th:text="#{authors-table-column-action}">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="author : ${authors}">
+        <td th:text="${author.id}">Awesome id</td>
+        <td th:text="${author.firstname}">Awesome firstname</td>
+        <td th:text="${author.lastname}">Awesome lastname</td>
+        <td>
+            <a th:href="@{/author/books/{id}(id=${author.id})}" th:text="#{author-book-button-caption}">Show books</a><br><br>
+            <a th:href="@{/author/delete/{id}(id=${author.id})}" th:text="#{delete-button-caption}">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div class="errors" th:if="${exception}" th:text="${exception}">Exception</div>
+</body>
+</html>
